@@ -100,7 +100,7 @@ class KNearestNeighbor(object):
     # The final result is a (num_test, num_train) matrix
     # so the x**2 and y**2 intermediates must be reshaped appropriately
     x2 = np.sum(X**2, axis=1).reshape((num_test, 1))
-    y2 = np.sum(self.X_train**2, axis=1).reshape((1, num_train)))
+    y2 = np.sum(self.X_train**2, axis=1).reshape((1, num_train))
     xy = -2*np.matmul(X, self.X_train.T)
     dists = np.sqrt(x2 + xy + y2)
 
