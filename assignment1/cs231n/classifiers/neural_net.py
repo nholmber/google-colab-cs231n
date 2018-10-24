@@ -46,7 +46,7 @@ class TwoLayerNet(object):
     self.params['v_W2'] = np.zeros_like(self.params['W2'])
     self.params['v_b2'] = np.zeros_like(self.params['b2'])
     self.mu = mu
-    self.mu_update_factor
+    self.mu_update_factor = mu_update_factor
 
   def loss(self, X, y=None, reg=0.0):
     """
