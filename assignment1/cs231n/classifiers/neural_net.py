@@ -18,7 +18,7 @@ class TwoLayerNet(object):
   The outputs of the second fully-connected layer are the scores for each class.
   """
 
-  def __init__(self, input_size, hidden_size, output_size, std=1e-4, mu=0.0):
+  def __init__(self, input_size, hidden_size, output_size, std=1e-4, mu=0.0, mu_update_factor=0.0):
     """
     Initialize the model. Weights are initialized to small random values and
     biases are initialized to zero. Weights and biases are stored in the
@@ -34,6 +34,7 @@ class TwoLayerNet(object):
     - hidden_size: The number of neurons H in the hidden layer.
     - output_size: The number of classes C.
     - mu: Friction parameter for SGD + momentum optimizer (optional, defaults to 0)
+    - mu_update_factor: Parameter which updates mu by this value each epoch until mu = 0.9 (optional, defaults to 0)
     """
     self.params = {}
     self.params['W1'] = std * np.random.randn(input_size, hidden_size)
@@ -45,6 +46,7 @@ class TwoLayerNet(object):
     self.params['v_W2'] = np.zeros_like(self.params['W2'])
     self.params['v_b2'] = np.zeros_like(self.params['b2'])
     self.mu = mu
+    self.mu_update_factor
 
   def loss(self, X, y=None, reg=0.0):
     """
@@ -211,10 +213,10 @@ class TwoLayerNet(object):
       # stored in the grads dictionary defined above.                         #
       #########################################################################
       # Update parameters using SGD + momentum
-      self.params['v_W1'] += self.mu * self.params['v_W1'] - learning_rate * grads['W1']
-      self.params['v_b1'] += self.mu * self.params['v_b1'] - learning_rate * grads['b1']
-      self.params['v_W2'] += self.mu * self.params['v_W2'] - learning_rate * grads['W2']
-      self.params['v_b2'] += self.mu * self.params['v_b2'] - learning_rate * grads['b2']
+      self.params['v_W1'] = self.mu * self.params['v_W1'] - learning_rate * grads['W1']
+      self.params['v_b1'] = self.mu * self.params['v_b1'] - learning_rate * grads['b1']
+      self.params['v_W2'] = self.mu * self.params['v_W2'] - learning_rate * grads['W2']
+      self.params['v_b2'] = self.mu * self.params['v_b2'] - learning_rate * grads['b2']
 
       self.params['W1'] += self.params['v_W1']
       self.params['b1'] += self.params['v_b1']
@@ -237,6 +239,10 @@ class TwoLayerNet(object):
 
         # Decay learning rate
         learning_rate *= learning_rate_decay
+
+        # Update momentum coefficient until it reaches 0.9
+        self.mu += self.mu_update_factor
+        if self.mu > 0.9: self.mu = 0.9
 
     return {
       'loss_history': loss_history,
