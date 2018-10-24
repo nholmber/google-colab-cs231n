@@ -271,10 +271,7 @@ class TwoLayerNet(object):
     # TODO: Implement this function; it should be VERY simple!                #
     ###########################################################################
     # Evaluate model by propagating X through NN
-    W1, b1 = self.params['W1'], self.params['b1']
-    W2, b2 = self.params['W2'], self.params['b2']
-    # Second fully connected layer
-    scores = np.dot(np.maximum(0, np.dot(X, W1) + b1), W2) + b2
+    scores = self.loss(X)
     # Return label as one with maximum score
     y_pred = np.argmax(scores, axis=1)
     ###########################################################################
