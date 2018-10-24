@@ -18,7 +18,7 @@ class TwoLayerNet(object):
   The outputs of the second fully-connected layer are the scores for each class.
   """
 
-  def __init__(self, input_size, hidden_size, output_size, std=1e-4):
+  def __init__(self, input_size, hidden_size, output_size, std=1e-4, mu=0.0):
     """
     Initialize the model. Weights are initialized to small random values and
     biases are initialized to zero. Weights and biases are stored in the
@@ -33,12 +33,18 @@ class TwoLayerNet(object):
     - input_size: The dimension D of the input data.
     - hidden_size: The number of neurons H in the hidden layer.
     - output_size: The number of classes C.
+    - mu: Friction parameter for SGD + momentum optimizer (optional, defaults to 0)
     """
     self.params = {}
     self.params['W1'] = std * np.random.randn(input_size, hidden_size)
     self.params['b1'] = np.zeros(hidden_size)
     self.params['W2'] = std * np.random.randn(hidden_size, output_size)
     self.params['b2'] = np.zeros(output_size)
+    self.params['v_W1'] = np.zeros_like(self.params['W1'])
+    self.params['v_b1'] = np.zeros_like(self.params['b1'])
+    self.params['v_W2'] = np.zeros_like(self.params['W2'])
+    self.params['v_b2'] = np.zeros_like(self.params['b2'])
+    self.mu = mu
 
   def loss(self, X, y=None, reg=0.0):
     """
@@ -204,10 +210,16 @@ class TwoLayerNet(object):
       # using stochastic gradient descent. You'll need to use the gradients   #
       # stored in the grads dictionary defined above.                         #
       #########################################################################
-      self.params['W1'] += -learning_rate * grads['W1']
-      self.params['b1'] += -learning_rate * grads['b1']
-      self.params['W2'] += -learning_rate * grads['W2']
-      self.params['b2'] += -learning_rate * grads['b2']
+      # Update parameters using SGD + momentum
+      self.params['v_W1'] += self.mu * self.params['v_W1'] - learning_rate * grads['W1']
+      self.params['v_b1'] += self.mu * self.params['v_b1'] - learning_rate * grads['b1']
+      self.params['v_W2'] += self.mu * self.params['v_W2'] - learning_rate * grads['W2']
+      self.params['v_b2'] += self.mu * self.params['v_b2'] - learning_rate * grads['b2']
+
+      self.params['W1'] += self.params['v_W1']
+      self.params['b1'] += self.params['v_b1']
+      self.params['W2'] += self.params['v_W2']
+      self.params['b2'] += self.params['v_b2']
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
